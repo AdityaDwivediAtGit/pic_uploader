@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white font-sans min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-violet-500">
+            AI Instagram Content Studio
+        </h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+            {% if not images %}
+            <div class="col-span-full text-center text-gray-400 py-12">
+                <p class="text-xl">No images processed yet. Add photos to '0 Raw Pics' and run the pipeline.</p>
+            </div>
+            {% else %}
+                {% for img in images %}
+                <div class="bg-gray-800 rounded-xl overflow-hidden shadow-lg border border-gray-700 flex flex-col" id="card-{{ img.id }}">
+                    <img src="/selected/{{ img.filename }}" alt="Selected Image" class="w-full h-64 object-cover">
+                    
+                    <div class="p-5 flex-grow">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold truncate">{{ img.filename }}</h2>
+                            <span class="bg-blue-900 text-blue-300 text-xs px-2 py-1 rounded-full font-semibold">Score: {{ "%.1f"|format(img.overall_score) }}</span>
+                        </div>
+                        
+                        <!-- Tabs / Content -->
+                        <div class="space-y-4">
+                            <div>
+                                <h3 class="text-sm text-gray-400 font-semibold uppercase tracking-wider mb-2">Hashtags</h3>
+                                <p class="text-sm text-blue-400 break-words">{{ img.hashtags }}</p>
+                            </div>
+                            
+                            <div>
+                                <h3 class="text-sm text-gray-400 font-semibold uppercase tracking-wider mb-2">Song Match</h3>
+                                <p class="text-sm">{{ img.recommended_song or "Not generated" }}</p>
+                            </div>
+
+                            <div>
+                                <h3 class="text-sm text-gray-400 font-semibold uppercase tracking-wider mb-2">Captions</h3>
+                                <ul class="text-sm list-disc pl-4 space-y-1 text-gray-300">
+                                    {% for caption in img.parsed_captions %}
+                                        <li>{{ caption }}</li>
+                                    {% else %}
+                                        <li>Not generated</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-900 p-4 border-t border-gray-700 flex justify-between gap-3">
+                        <button onclick="updateStatus({{ img.id }}, 'reject')" class="flex-1 bg-gray-700 hover:bg-red-600 text-white py-2 rounded-lg transition-colors font-medium">Reject</button>
+                        <button onclick="updateStatus({{ img.id }}, 'approve')" class="flex-1 bg-gradient-to-r from-pink-500 to-violet-500 hover:from-pink-600 hover:to-violet-600 text-white py-2 rounded-lg transition-colors font-medium shadow-lg">Approve</button>
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        async function updateStatus(id, action) {
+            try {
+                const res = await fetch(`/api/images/${id}/${action}`, { method: 'POST' });
+                if (res.ok) {
+                    const card = document.getElementById(`card-${id}`);
+                    card.style.opacity = '0.5';
+                    card.style.pointerEvents = 'none';
+                    card.querySelector('.flex-1').innerText = action === 'approve' ? 'Approved' : 'Rejected';
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Failed to update status.");
+            }
+        }
+    </script>
+</body>
+</html>

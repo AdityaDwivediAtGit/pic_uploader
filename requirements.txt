@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+jinja2
+python-multipart
+sqlalchemy
+pydantic
+pydantic-settings
+pyyaml
+opencv-python
+pillow
+google-generativeai
+imagehash
+numpy
+scipy
