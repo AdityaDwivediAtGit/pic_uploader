@@ -1,2 +1,11 @@
 # Ignore raw photo input folder
 0 Raw Pics/
+1 Selected Pics/
+2 Enhanced Pics/
+3 Text Added Pics/
+4 Captions/
+5 Stories/
+6 Metadata/
+7 Final Export/
+*.pyc
+*.log
